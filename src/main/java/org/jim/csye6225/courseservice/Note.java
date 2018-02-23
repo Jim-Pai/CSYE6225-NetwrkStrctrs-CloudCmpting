@@ -1,11 +1,12 @@
 package org.jim.csye6225.courseservice;
 
 public class Note {
+	public String noteId;
 	public String content;
 	
 	public Note() {}
 	
-	public Note(String content) {
-		this.content = content;
+	public void update(Note note) {
+		this.content = note.content;
 	}
 }
