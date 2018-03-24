@@ -1,24 +1,35 @@
 package org.jim.csye6225.courseservice;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Lecture {
-	public String lectureId;
+import org.jim.csye6225.courseservice.database.DynamoDBSetCoverter;
+
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
+
+@DynamoDBTable(tableName = "Lectures")
+public class Lecture extends BasicObject{
 	public String topic;
-	public List<Note> notes;
+	public Set<String> notes;
 	
-	public void update(Lecture lecture) {
-		this.topic = lecture.topic;
-		this.notes = lecture.notes;
-	}
+	@DynamoDBHashKey(attributeName = "LectureId")
+	public String getId() { return this.id; }
+	public void setId(String id) { this.id = id; }
 	
-	public void addNote(Note note) {
-		if(!notes.contains(note))
-			notes.add(note);
-	}
+	@DynamoDBAttribute(attributeName = "Topic")
+	public String getTopic() { return this.topic; }
+	public void setTopic(String topic) { this.topic = topic; }
 	
-	public void removeNote(Note note) {
-		if(notes.contains(note))
-			notes.remove(note);
+	@DynamoDBAttribute(attributeName = "Notes")
+	@DynamoDBTypeConverted(converter = DynamoDBSetCoverter.class)
+	public Set<String> getNotes() { 
+		if(this.notes == null)
+			this.notes = new HashSet<>();
+		return this.notes;
 	} 
+	
+	public void setNotes(Set<String> notes) { this.notes = notes; }
 }

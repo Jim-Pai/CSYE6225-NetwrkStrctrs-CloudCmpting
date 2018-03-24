@@ -1,8 +1,6 @@
 package org.jim.csye6225.courseservice;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -14,35 +12,43 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.jim.csye6225.courseservice.database.DynamoDB;
+
 
 @Path("lectures/{lectureId}/notes")
 public class NoteResource {
-	// key : noteId, value: Note
-	private static Map<String, Note> noteMap = new HashMap<>();
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<Note> getNotes(){
-		return noteMap.values();
+	public Set<String> getNotes(@PathParam("lectureId") String lectureId){
+		DynamoDB dynamoDB = DynamoDB.getInstance();
+		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
+		if(lecture == null)
+			return null;
+		return lecture.notes;
 	} 
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Note createNote(Note note, @PathParam("lectureId") String lectureId) {
-		if(!noteMap.containsKey(note.noteId)) {
-			Lecture lecture = LectureResource.getLectureInstance(lectureId);
-			lecture.addNote(note);
-			noteMap.put(note.noteId, note);
-		}
-		return noteMap.get(note.noteId);
+		DynamoDB dynamoDB = DynamoDB.getInstance();
+		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
+		if(dynamoDB.contains("Notes", note.id) || lecture == null)
+			return null;
+		
+		dynamoDB.addOrUpdateItem(note);
+		lecture.getNotes().add(note.id);
+		dynamoDB.addOrUpdateItem(lecture);
+		return note;
 	}
 	
 	@GET
 	@Path("{noteId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Note getNote(@PathParam("noteId") String noteId) {
-		return noteMap.get(noteId);
+		DynamoDB dynamoDB = DynamoDB.getInstance();
+		return (Note)dynamoDB.getItem("Notes", noteId);
 	}
 	
 	@PUT
@@ -51,27 +57,26 @@ public class NoteResource {
 	public Note updateNote(Note note
 			, @PathParam("lectureId") String lectureId
 			, @PathParam("noteId") String noteId) {
-		Note oldNote = noteMap.get(noteId);
-		if(oldNote != null)
-			oldNote.update(note);
-		else {
-			Lecture lecture = LectureResource.getLectureInstance(lectureId);
-			lecture.addNote(note);
-			noteMap.put(note.noteId, note);
-		}
-		return noteMap.get(noteId);
+		DynamoDB dynamoDB = DynamoDB.getInstance();
+		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
+		if(lecture == null)
+			return null;
+		lecture.getNotes().add(note.id);
+		dynamoDB.addOrUpdateItem(lecture);
+		dynamoDB.addOrUpdateItem(note);
+		return note;
 	}
 	
 	@DELETE
 	@Path("{noteId}")
 	public void deleteNote(@PathParam("lectureId") String lectureId
 			, @PathParam("noteId") String noteId) {
-		if(!noteMap.containsKey(noteId))
+		DynamoDB dynamoDB = DynamoDB.getInstance();
+		Lecture lecture = (Lecture)dynamoDB.getItem("Lectures", lectureId);
+		if(lecture == null)
 			return;
-		
-		Lecture lecture = LectureResource.getLectureInstance(lectureId);
-		Note note = noteMap.get(noteId);
-		lecture.removeNote(note);
-		noteMap.remove(noteId);
+		lecture.getNotes().remove(noteId);
+		dynamoDB.addOrUpdateItem(lecture);
+		dynamoDB.deleteItem("Notes", noteId);
 	}
 }
