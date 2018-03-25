@@ -45,6 +45,7 @@ public class DynamoDB {
 			// Please enter your own access_key_id and secret_access_key
 			BasicAWSCredentials awsCreds = new BasicAWSCredentials("access_key_id"
 					, "secret_access_key");
+			
 			//DefaultAWSCredentialsProviderChain.getInstance()
 			dynamoDb = AmazonDynamoDBClientBuilder
 					.standard()

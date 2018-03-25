@@ -16,10 +16,8 @@ import org.jim.csye6225.courseservice.database.DynamoDB;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.CreateTopicRequest;
-import com.amazonaws.services.sns.model.CreateTopicResult;
 import com.amazonaws.services.sns.model.DeleteTopicRequest;
 
 @Path("programs/{programId}/courses")
