@@ -50,6 +50,14 @@ public class APIMenu {
 				"GET /lectures/{lectureId}/notes/{noteId}\n" + 
 				"POST /lectures/{lectureId}/notes\n" + 
 				"PUT /lectures/{lectureId}/notes/{noteId}\n" + 
-				"DELETE /lectures/{lectureId}/notes/{noteId}";
+				"DELETE /lectures/{lectureId}/notes/{noteId}\n\n" + 
+				"// Professors\n" +  
+				"POST /professors\n" + 
+				"GET /professors/{professorId}\n" +
+				"PUT /professors/{professorId}\n" + 
+				"DELETE /professors/{professorId}\n\n"+
+				"// Instruct Course\n" +  
+				"GET /courses/{courseId}/professors\n" + 
+				"POST /courses/{courseId}/professors/{professorId}\n";
 	} 
 }
